@@ -1,7 +1,10 @@
 import modules.utils as util
+import modules.input as io
+from modules.manager import ProgramManager
 
-# Constants
+PROMPT: str        = ">>"
 USAGE_MSG: str     = "Enter a command (or type 'help' for more information)"
+EXIT_MSG: str      = "Successfully exited program."
 DRIVER_LOGGER: str = "moderngl_window"
 
 from pathlib import Path
@@ -19,9 +22,19 @@ def import_module_from_path(filepath):
 
 def main():
     print(USAGE_MSG)
-    util.disable_logging(DRIVER_LOGGER)
-    module = import_module_from_path(util.add_abs_path(__file__, "templates\\02_basic\\app.py"))
-    module.NewWindow.run()
+    program = ProgramManager(DRIVER_LOGGER)
+    while program.should_run():
+        input: list = io.get_input(PROMPT)
+        command = program.find_command(input)
+        if(command == None):
+            print("Invalid input" + '\n' + USAGE_MSG)
+            continue
+        command()
+    print(EXIT_MSG)
+
+# util.disable_logging(DRIVER_LOGGER)
+# module = import_module_from_path(util.add_abs_path(__file__, "templates\\02_basic\\app.py"))
+# module.NewWindow.run()
 
 if __name__ == "__main__":
     main()

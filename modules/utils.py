@@ -29,3 +29,9 @@ def import_window_class(path: str, class_name: str):
 
 def add_abs_path(file: str, path: str) -> str:
     return f"{os.path.dirname(os.path.abspath(file))}\\{path}"
+
+def clear_screen():
+    if os.name == 'nt':
+        os.system('cls')
+    else:
+        os.system('clear')

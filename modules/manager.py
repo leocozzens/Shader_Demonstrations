@@ -2,7 +2,6 @@ from typing import Callable
 import modules.utils as util
 from modules.window import ProgramWindow
 
-SUCCESSFUL_EXIT_MSG: str      = "Successfully exited program."
 RELATIVE_APP_PATH:str         = "/app.py"
 RELATIVE_PROGRAM_FOLDER: str  = "/programs"
 RELATIVE_TEMPLATE_FOLDER: str = "/templates"
@@ -31,10 +30,8 @@ class ProgramManager():
         self.logger = logger
 
         self.running = True
-        self.exitMsg = SUCCESSFUL_EXIT_MSG
         self.functions = CommandFunctions(self)
         self.input: list[str] = [ "" ]
-
         self.windows: dict[str, ProgramWindow] = []
     def load_windows(self) -> str:
         windowResults: list[str] = []
@@ -52,13 +49,13 @@ class ProgramManager():
         return '\n'.join(windowResults)
     def get_input(self, prompt: str):
         inputData = input(prompt + ' ')
-        inputData = inputData.lower()
         self.input = inputData.split(' ')
+        self.input[0] = self.input[0].lower()
     def find_command(self) -> CommandData | None:
-        if(self.input[0] == ""):
+        if self.input[0] == "":
             return None
         for key, value in self.functions.COMMANDS.items():
-            if(self.input[0] == key):
+            if self.input[0] == key or self.input[0] == key[0]:
                 return value
         return None
     def last_command(self) -> str:

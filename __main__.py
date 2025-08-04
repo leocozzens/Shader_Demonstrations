@@ -3,6 +3,7 @@ WINDOW_CLASS_NAME: str = "GLWindow"
 DRIVER_LOGGER: str     = "moderngl_window"
 PROMPT: str            = ">>"
 USAGE_MSG: str         = "Enter a command (or type 'help' for more information)."
+EXIT_MSG: str          = "Exiting program..."
 
 def init() -> ProgramManager:
     program = ProgramManager(__file__, WINDOW_CLASS_NAME, DRIVER_LOGGER)
@@ -24,6 +25,7 @@ def main():
         else:
             output = command.cmd()
         if output != None: print(output)
+    print(EXIT_MSG)
 
 if __name__ == "__main__":
     main()

@@ -110,7 +110,10 @@ class CommandFunctions():
             util.recursive_copy(templatePath, programPath)
         except Exception as e:
             return f"Failed to create new program '{programName}' from '{templateName}' template: {e}"
-        return f"Successfully created new program '{programName}' from '{templateName}' template."
+        return (
+            f"Successfully created new program '{programName}' from '{templateName}' template.\n"
+            "Please update cache with 'update'."
+        )
     def template(self) -> str | None:
         programName = self.program.input[2]
         programPath = f"{self.program.programFolder}{RELATIVE_PROGRAM_FOLDER}/{programName}"
@@ -124,10 +127,7 @@ class CommandFunctions():
             util.recursive_copy(programPath, templatePath)
         except Exception as e:
             return f"Failed to create new template '{templateName}' from '{programName}' program: {e}"
-        return (
-            f"Successfully created new template '{templateName}' from '{programName}' template.\n"
-            "Please update cache with 'update'."
-        )
+        return f"Successfully created new template '{templateName}' from '{programName}' template."
     def log(self) -> str | None:
         util.enable_logging(self.program.logger)
         return f"Successfully enabled driver logs for {self.program.logger}."

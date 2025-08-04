@@ -1,4 +1,5 @@
 import os
+import shutil
 import logging
 import importlib.util
 
@@ -15,14 +16,26 @@ def get_all_subfolders(path: str) -> list[str]:
         if os.path.isdir(file): dirs.append(file)
     return dirs
 
-def get_basename(path: str):
+def get_basename(path: str) -> str:
     return os.path.basename(os.path.normpath(path))
 
-def disable_logging(name: str) -> None:
-    logging.getLogger(name).addHandler(logging.NullHandler())
+def file_exists(path: str) -> bool:
+    return os.path.exists(path)
 
-def enable_logging(name: str) -> None:
+def recursive_copy(src: str, dest: str):
+    shutil.copytree(src, dest)
+
+def disable_logging(name: str):
+    logger = logging.getLogger(name)
+    logger.handlers.clear()
+    logger.propagate = False
+    logger.addHandler(logging.NullHandler())
+
+def enable_logging(name: str):
     logging.getLogger(name).handlers.clear()
+
+def add_abs_path(file: str, path: str) -> str:
+    return f"{os.path.normpath(os.path.dirname(os.path.abspath(file)))}/{path}"
 
 def import_window_class(path: str, windowClass: str):
     path = os.path.abspath(path)
@@ -37,9 +50,6 @@ def import_window_class(path: str, windowClass: str):
     if not hasattr(module, windowClass):
         raise AttributeError(f"No class '{windowClass}' found in {path}.")
     return getattr(module, windowClass)
-
-def add_abs_path(file: str, path: str) -> str:
-    return f"{os.path.dirname(os.path.abspath(file))}\\{path}"
 
 def clear_screen():
     if os.name == 'nt':

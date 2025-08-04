@@ -17,7 +17,7 @@ def main():
         output = None
         program.get_input(PROMPT)
         command = program.find_command()
-        if(command == None):
+        if command == None:
             output = '\n'.join([ f"Command '{program.last_command()}' does not exist.", USAGE_MSG ])
         elif not program.validate_command(command.usage):
             syntax = f"{program.last_command()} {str(command.usage)}".strip()

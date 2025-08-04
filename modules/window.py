@@ -28,8 +28,20 @@ class ProgramWindow(mglw.WindowConfig):
         self.ctx.viewport = (0, 0, width, height)
         self.texture = self.ctx.texture(self.wnd.size, 4)
 
+    def key_event(self, key, action, modifiers):
+        keys = self.wnd.keys
+        if key == keys.ESCAPE and action == keys.ACTION_PRESS:
+            self.on_close()
+
+    def on_close(self):
+        if not self.wnd.is_closing:
+            self.wnd.close()
+
     @abstractmethod
     def get_shaders(self) -> Shaders:
+        pass
+    @abstractmethod
+    def empty_shaders(self):
         pass
     @abstractmethod
     def get_vao(self) -> VertexArray:

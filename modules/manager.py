@@ -6,6 +6,8 @@ RELATIVE_APP_PATH:str         = "/app.py"
 RELATIVE_PROGRAM_FOLDER: str  = "/programs"
 RELATIVE_TEMPLATE_FOLDER: str = "/templates"
 
+HELP_PREFACE:str = "Command syntax is displayed below, the first letter of each command may be used as a shortcut."
+
 class CommandUsage():
     def __init__(self, syntax: str, min: int, max: int):
         self.syntax = syntax
@@ -25,6 +27,7 @@ class CommandData():
 
 class ProgramManager():
     def __init__(self, programFile: str, windowClass: str, logger: str):
+        util.disable_logging(logger)
         self.programFolder = util.get_folder(programFile)
         self.windowClass = windowClass
         self.logger = logger
@@ -32,7 +35,7 @@ class ProgramManager():
         self.running = True
         self.functions = CommandFunctions(self)
         self.input: list[str] = [ "" ]
-        self.windows: dict[str, ProgramWindow] = []
+        self.windows: dict[str, ProgramWindow] = {}
     def load_windows(self) -> str:
         windowResults: list[str] = []
         programFolders = util.get_all_subfolders(self.programFolder + RELATIVE_PROGRAM_FOLDER)
@@ -44,11 +47,11 @@ class ProgramManager():
                 windowResults.append(f"Succesfully loaded {self.windowClass} from {folderBase}.")
             except Exception as e:
                 windowResults.append(e)
-        if(util.dict_empty(self.windows)):
-            windowResults.append("No windows loaded.")
+        if util.dict_empty(self.windows):
+            windowResults.append("No window programs loaded.")
         return '\n'.join(windowResults)
     def get_input(self, prompt: str):
-        inputData = input(prompt + ' ')
+        inputData = input(prompt + ' ').strip()
         self.input = inputData.split(' ')
         self.input[0] = self.input[0].lower()
     def find_command(self) -> CommandData | None:
@@ -74,20 +77,57 @@ class ProgramManager():
 
 class CommandFunctions():
     def run(self) -> str | None:
-        return "ran"
+        name = self.program.input[1]
+        if name not in self.program.windows.keys():
+            return f"No GLWindow with name '{name}' found."
+        self.program.windows[name].run()
+        return f"Successfully ran and exited GLWindow located in '{name}'."
     def enumerate(self) -> str | None:
-        if util.dict_empty(self.program.windows):
-            return "No windows loaded."
-        return '\n'.join(self.program.windows.keys())
+        prepender = '- '
+        programs = [ prepender + program for program in self.program.windows.keys()]
+        templates = util.get_all_subfolders(f"{self.program.programFolder}{RELATIVE_TEMPLATE_FOLDER}")
+        templates = [ prepender + util.get_basename(template) for template in templates ]
+        return '\n'.join([
+            "Enumeration Results:",
+            "{:-^50s}".format("Window Programs"),
+            *programs,
+            "{:-^50s}".format("Existing Templates"),
+            *templates
+        ])
     def update(self) -> str | None:
-        return "updated"
+        self.program.windows.clear()
+        return "Wiped windows from memory.\n" + self.program.load_windows()
     def spawn(self) -> str | None:
-        return "spawned"
-    def clear(self) -> str | None:
-        util.clear_screen()
-        return None
+        templateName = self.program.input[1]
+        templatePath = f"{self.program.programFolder}{RELATIVE_TEMPLATE_FOLDER}/{templateName}"
+        programName = self.program.input[2]
+        programPath = f"{self.program.programFolder}{RELATIVE_PROGRAM_FOLDER}/{programName}"
+        if not util.file_exists(templatePath):
+            return f"No template with name '{templateName}' could be found."
+        if util.file_exists(programPath):
+            return f"Program with name '{programName}' already exists"
+        try:
+            util.recursive_copy(templatePath, programPath)
+        except Exception as e:
+            return f"Failed to create new program '{programName}' from '{templateName}' template: {e}"
+        return f"Successfully created new program '{programName}' from '{templateName}' template."
     def template(self) -> str | None:
-        return "templated"
+        programName = self.program.input[2]
+        programPath = f"{self.program.programFolder}{RELATIVE_PROGRAM_FOLDER}/{programName}"
+        templateName = self.program.input[1]
+        templatePath = f"{self.program.programFolder}{RELATIVE_TEMPLATE_FOLDER}/{templateName}"
+        if not util.file_exists(programPath):
+            return f"No program with name '{programName}' could be found."
+        if util.file_exists(templatePath):
+            return f"Template with name '{templateName}' already exists"
+        try:
+            util.recursive_copy(programPath, templatePath)
+        except Exception as e:
+            return f"Failed to create new template '{templateName}' from '{programName}' program: {e}"
+        return (
+            f"Successfully created new template '{templateName}' from '{programName}' template.\n"
+            "Please update cache with 'update'."
+        )
     def log(self) -> str | None:
         util.enable_logging(self.program.logger)
         return f"Successfully enabled driver logs for {self.program.logger}."
@@ -98,7 +138,11 @@ class CommandFunctions():
         longest = max(len(key) + len(str(value.usage)) for key, value in self.COMMANDS.items())
         longest += 1
         text = [ f"{key + ' ' + str(value.usage):<{longest}} - {value.about}" for key, value in self.COMMANDS.items() ] 
+        text.insert(0, HELP_PREFACE)
         return '\n'.join(text)
+    def clear(self) -> str | None:
+        util.clear_screen()
+        return None
     def quit(self) -> str | None:
         self.program.stop()
         return None
@@ -129,17 +173,11 @@ class CommandFunctions():
                     "Spawn a new program folder based on a template.",
                     CommandUsage("<template> <program>", 2, 2),
                     self.spawn
-                    ),
-            "clear":
-                CommandData(
-                    "Clear the terminal screen.",
-                    NO_ARGS,
-                    self.clear
-                    ),
+                ),
             "template":
                 CommandData(
                     "Create a new template based on an existing project folder.",
-                    CommandUsage("<template> <program>", 2, 2),
+                    CommandUsage("<program> <template>", 2, 2),
                     self.template
                 ),
             "log":
@@ -159,6 +197,12 @@ class CommandFunctions():
                     "Request command information.",
                     NO_ARGS,
                     self.help
+                ),
+            "clear":
+                CommandData(
+                    "Clear the terminal screen.",
+                    NO_ARGS,
+                    self.clear
                 ),
             "quit":
                 CommandData(

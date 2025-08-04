@@ -32,7 +32,9 @@ def disable_logging(name: str):
     logger.addHandler(logging.NullHandler())
 
 def enable_logging(name: str):
-    logging.getLogger(name).handlers.clear()
+    logger = logging.getLogger(name)
+    logger.handlers.clear()
+    logger.propagate = True
 
 def add_abs_path(file: str, path: str) -> str:
     return f"{os.path.normpath(os.path.dirname(os.path.abspath(file)))}/{path}"

@@ -115,9 +115,9 @@ class CommandFunctions():
             "Please update cache with 'update'."
         )
     def template(self) -> str | None:
-        programName = self.program.input[2]
+        programName = self.program.input[1]
         programPath = f"{self.program.programFolder}{RELATIVE_PROGRAM_FOLDER}/{programName}"
-        templateName = self.program.input[1]
+        templateName = self.program.input[2]
         templatePath = f"{self.program.programFolder}{RELATIVE_TEMPLATE_FOLDER}/{templateName}"
         if not util.file_exists(programPath):
             return f"No program with name '{programName}' could be found."

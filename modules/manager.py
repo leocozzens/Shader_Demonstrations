@@ -46,7 +46,7 @@ class ProgramManager():
                 self.windows[folderBase] = newClass
                 windowResults.append(f"Succesfully loaded {self.windowClass} from {folderBase}.")
             except Exception as e:
-                windowResults.append(e)
+                windowResults.append(str(e))
         if util.dict_empty(self.windows):
             windowResults.append("No window programs loaded.")
         return '\n'.join(windowResults)
@@ -109,12 +109,15 @@ class CommandFunctions():
         try:
             util.recursive_copy(templatePath, programPath)
         except Exception as e:
-            return f"Failed to create new program '{programName}' from '{templateName}' template: {e}"
-        return f"Successfully created new program '{programName}' from '{templateName}' template."
+            return f"Failed to create new program '{programName}' from '{templateName}' template: {str(e)}"
+        return (
+            f"Successfully created new program '{programName}' from '{templateName}' template.\n"
+            "Please update cache with 'update'."
+        )
     def template(self) -> str | None:
-        programName = self.program.input[2]
+        programName = self.program.input[1]
         programPath = f"{self.program.programFolder}{RELATIVE_PROGRAM_FOLDER}/{programName}"
-        templateName = self.program.input[1]
+        templateName = self.program.input[2]
         templatePath = f"{self.program.programFolder}{RELATIVE_TEMPLATE_FOLDER}/{templateName}"
         if not util.file_exists(programPath):
             return f"No program with name '{programName}' could be found."
@@ -123,11 +126,8 @@ class CommandFunctions():
         try:
             util.recursive_copy(programPath, templatePath)
         except Exception as e:
-            return f"Failed to create new template '{templateName}' from '{programName}' program: {e}"
-        return (
-            f"Successfully created new template '{templateName}' from '{programName}' template.\n"
-            "Please update cache with 'update'."
-        )
+            return f"Failed to create new template '{templateName}' from '{programName}' program: {str(e)}"
+        return f"Successfully created new template '{templateName}' from '{programName}' template."
     def log(self) -> str | None:
         util.enable_logging(self.program.logger)
         return f"Successfully enabled driver logs for {self.program.logger}."

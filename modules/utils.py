@@ -42,6 +42,8 @@ def add_abs_path(file: str, path: str) -> str:
 def import_window_class(path: str, windowClass: str):
     path = os.path.abspath(path)
     moduleName = os.path.splitext(os.path.basename(path))[0]
+    if not os.path.exists(path):
+        raise Exception(f"No module located at {path}.")
 
     spec = importlib.util.spec_from_file_location(moduleName, path)
     if spec == None or spec.loader == None:

@@ -2,7 +2,7 @@ from moderngl import VertexArray
 import modules.window as wnd
 import modules.utils as util
 
-class NewWindow(wnd.ProgramWindow):
+class GLWindow(wnd.ProgramWindow):
     title = "Template #1 - Skeleton"
     shaderFolder = "shaders/"
     shaderPaths = {

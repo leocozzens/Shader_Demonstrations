@@ -16,13 +16,17 @@ class ProgramWindow(mglw.WindowConfig):
     gl_version = (3, 3)
     window_size = (800, 600)
     resizable = True
-    # TODO: Add resize callback
+    aspect_ratio = None
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.prog = self.ctx.program(**self.get_shaders().get_data())
         self.texture = self.ctx.texture(self.wnd.size, 4)
         self.vao = self.get_vao()
+
+    def on_resize(self, width: int, height: int):
+        self.ctx.viewport = (0, 0, width, height)
+        self.texture = self.ctx.texture(self.wnd.size, 4)
 
     @abstractmethod
     def get_shaders(self) -> Shaders:

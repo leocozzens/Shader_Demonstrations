@@ -1,7 +1,22 @@
 import os
-import sys
 import logging
 import importlib.util
+
+def dict_empty(dictionary: dict) -> bool:
+    return not bool(dictionary)
+
+def get_folder(path: str) -> str:
+    return os.path.dirname(os.path.normpath(os.path.abspath(path)))
+
+def get_all_subfolders(path: str) -> list[str]:
+    dirs: list[str] = []
+    for file in os.listdir(path):
+        file = os.path.normpath(f"{path}/{file}")
+        if os.path.isdir(file): dirs.append(file)
+    return dirs
+
+def get_basename(path: str):
+    return os.path.basename(os.path.normpath(path))
 
 def disable_logging(name: str) -> None:
     logging.getLogger(name).addHandler(logging.NullHandler())
@@ -9,23 +24,19 @@ def disable_logging(name: str) -> None:
 def enable_logging(name: str) -> None:
     logging.getLogger(name).handlers.clear()
 
-def import_window_class(path: str, class_name: str):
-    # Ensure it's an absolute path to a .py file
+def import_window_class(path: str, windowClass: str):
     path = os.path.abspath(path)
-    module_name = os.path.splitext(os.path.basename(path))[0]
+    moduleName = os.path.splitext(os.path.basename(path))[0]
 
-    spec = importlib.util.spec_from_file_location(module_name, path)
-    if spec is None or spec.loader is None:
-        raise ImportError(f"Could not load module from {path}")
+    spec = importlib.util.spec_from_file_location(moduleName, path)
+    if spec == None or spec.loader == None:
+        raise ImportError(f"Failed to load module from {path}.")
 
     module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
     spec.loader.exec_module(module)
-
-    # Grab the class
-    if not hasattr(module, class_name):
-        raise AttributeError(f"No class '{class_name}' found in {path}")
-    return getattr(module, class_name)
+    if not hasattr(module, windowClass):
+        raise AttributeError(f"No class '{windowClass}' found in {path}.")
+    return getattr(module, windowClass)
 
 def add_abs_path(file: str, path: str) -> str:
     return f"{os.path.dirname(os.path.abspath(file))}\\{path}"

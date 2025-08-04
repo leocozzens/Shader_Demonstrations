@@ -46,7 +46,7 @@ class ProgramManager():
                 self.windows[folderBase] = newClass
                 windowResults.append(f"Succesfully loaded {self.windowClass} from {folderBase}.")
             except Exception as e:
-                windowResults.append(e)
+                windowResults.append(str(e))
         if util.dict_empty(self.windows):
             windowResults.append("No window programs loaded.")
         return '\n'.join(windowResults)
@@ -109,7 +109,7 @@ class CommandFunctions():
         try:
             util.recursive_copy(templatePath, programPath)
         except Exception as e:
-            return f"Failed to create new program '{programName}' from '{templateName}' template: {e}"
+            return f"Failed to create new program '{programName}' from '{templateName}' template: {str(e)}"
         return (
             f"Successfully created new program '{programName}' from '{templateName}' template.\n"
             "Please update cache with 'update'."
@@ -126,7 +126,7 @@ class CommandFunctions():
         try:
             util.recursive_copy(programPath, templatePath)
         except Exception as e:
-            return f"Failed to create new template '{templateName}' from '{programName}' program: {e}"
+            return f"Failed to create new template '{templateName}' from '{programName}' program: {str(e)}"
         return f"Successfully created new template '{templateName}' from '{programName}' template."
     def log(self) -> str | None:
         util.enable_logging(self.program.logger)
